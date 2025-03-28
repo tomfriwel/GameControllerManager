@@ -34,6 +34,10 @@ struct ContentView: View {
         "R2": "r2.button.roundedtop.horizontal"
     ]
 
+    // 摇杆位置
+    @State private var leftThumbstickPosition: CGPoint = .zero
+    @State private var rightThumbstickPosition: CGPoint = .zero
+
     // 按键名称与 SF Symbols 图标的映射
     private let buttonMappings: [String: String] = [
         "D-Pad Up": "arrow.up.circle.fill",
@@ -120,6 +124,58 @@ struct ContentView: View {
                             .foregroundColor(.purple)
                     }
                     Divider()
+                    // 摇杆显示
+                    HStack(spacing: 40) {
+                        // 左摇杆
+                        ZStack {
+                            Circle() // 摇杆底座
+                                .stroke(lineWidth: 2)
+                                .frame(width: 80, height: 80)
+                                .foregroundColor(.gray)
+                            Circle() // 摇杆位置指示器
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.blue)
+                                .offset(x: leftThumbstickPosition.x * 25, y: leftThumbstickPosition.y * 25)
+                            Text("L") // 左摇杆标签
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .offset(y: 45)
+                            // 显示具体数值
+                            VStack {
+                                Text("x: \(String(format: "%.2f", leftThumbstickPosition.x))")
+                                Text("y: \(String(format: "%.2f", leftThumbstickPosition.y))")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .offset(y: -45)
+                        }
+                        
+                        // 右摇杆
+                        ZStack {
+                            Circle() // 摇杆底座
+                                .stroke(lineWidth: 2)
+                                .frame(width: 80, height: 80)
+                                .foregroundColor(.gray)
+                            Circle() // 摇杆位置指示器
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.red)
+                                .offset(x: rightThumbstickPosition.x * 25, y: rightThumbstickPosition.y * 25)
+                            Text("R") // 右摇杆标签
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .offset(y: 45)
+                            // 显示具体数值
+                            VStack {
+                                Text("x: \(String(format: "%.2f", rightThumbstickPosition.x))")
+                                Text("y: \(String(format: "%.2f", rightThumbstickPosition.y))")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .offset(y: -45)
+                        }
+                    }
+                    .padding()
+                    Divider()
                     // D-Pad 和按键布局
                     HStack {
                         // D-Pad 图标
@@ -205,6 +261,16 @@ struct ContentView: View {
     // 设置手柄按键输入监听
     private func setupControllerInput(_ controller: GCController) {
         controller.extendedGamepad?.valueChangedHandler = { [self] gamepad, element in
+            // 更新摇杆位置
+            self.leftThumbstickPosition = CGPoint(
+                x: CGFloat(gamepad.leftThumbstick.xAxis.value),
+                y: -CGFloat(gamepad.leftThumbstick.yAxis.value)  // 注意：摇杆Y轴在UI中是反向的
+            )
+            self.rightThumbstickPosition = CGPoint(
+                x: CGFloat(gamepad.rightThumbstick.xAxis.value),
+                y: -CGFloat(gamepad.rightThumbstick.yAxis.value)  // 注意：摇杆Y轴在UI中是反向的
+            )
+            
             // 检测按键输入并更新按键名称
             if let button = element as? GCControllerButtonInput {
                 let buttonName = buttonName(for: button, in: gamepad) // 获取按键名称
