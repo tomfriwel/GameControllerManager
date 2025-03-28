@@ -298,14 +298,15 @@ struct ContentView: View {
     // 设置手柄按键输入监听
     private func setupControllerInput(_ controller: GCController) {
         controller.extendedGamepad?.valueChangedHandler = { [self] gamepad, element in
-            // 更新摇杆位置
+            // 实时更新摇杆位置 - 不依赖于特定元素触发
             self.leftThumbstickPosition = CGPoint(
                 x: CGFloat(gamepad.leftThumbstick.xAxis.value),
-                y: -CGFloat(gamepad.leftThumbstick.yAxis.value)  // 注意：摇杆Y轴在UI中是反向的
+                y: -CGFloat(gamepad.leftThumbstick.yAxis.value)
             )
+            
             self.rightThumbstickPosition = CGPoint(
                 x: CGFloat(gamepad.rightThumbstick.xAxis.value),
-                y: -CGFloat(gamepad.rightThumbstick.yAxis.value)  // 注意：摇杆Y轴在UI中是反向的
+                y: -CGFloat(gamepad.rightThumbstick.yAxis.value)
             )
             
             // 检测按键输入并更新按键名称
@@ -333,73 +334,107 @@ struct ContentView: View {
                     }
                 }
             } else if let dpad = element as? GCControllerDirectionPad {
-                // 处理上方向键
-                if dpad.up.isPressed {
-                    self.lastButtonPressed = "D-Pad Up"
-                    self.startTrackingButtonPress("D-Pad Up")
-                    self.startTimer(for: "D-Pad Up")
-                    self.dpadState = "dpad.up.filled" // 更新 D-Pad 状态
-                    self.currentPressedButtons.insert("D-Pad Up") // 添加到当前按下的按键集合
-                } else if dpad.up.value == 0 && currentPressedButtons.contains("D-Pad Up") {
-                    self.stopTrackingButtonPress("D-Pad Up")
-                    self.currentPressedButtons.remove("D-Pad Up")
-                    if self.lastButtonPressed == "D-Pad Up" {
+                // 确认这是真正的方向键而不是摇杆
+                if dpad == gamepad.dpad {
+                    // 处理上方向键
+                    if dpad.up.isPressed {
+                        self.lastButtonPressed = "D-Pad Up"
+                        self.startTrackingButtonPress("D-Pad Up")
+                        self.startTimer(for: "D-Pad Up")
+                        self.dpadState = "dpad.up.filled"
+                        self.currentPressedButtons.insert("D-Pad Up")
+                    } else if dpad.up.value == 0 && currentPressedButtons.contains("D-Pad Up") {
+                        self.stopTrackingButtonPress("D-Pad Up")
+                        self.currentPressedButtons.remove("D-Pad Up")
+                        if self.lastButtonPressed == "D-Pad Up" {
+                            self.lastButtonPressed = "None"
+                            self.stopTimer()
+                        }
+                    }
+                    
+                    // 处理下方向键
+                    if dpad.down.isPressed {
+                        self.lastButtonPressed = "D-Pad Down"
+                        self.startTrackingButtonPress("D-Pad Down")
+                        self.startTimer(for: "D-Pad Down")
+                        self.dpadState = "dpad.down.filled"
+                        self.currentPressedButtons.insert("D-Pad Down")
+                    } else if dpad.down.value == 0 && currentPressedButtons.contains("D-Pad Down") {
+                        self.stopTrackingButtonPress("D-Pad Down")
+                        self.currentPressedButtons.remove("D-Pad Down")
+                        if self.lastButtonPressed == "D-Pad Down" {
+                            self.lastButtonPressed = "None"
+                            self.stopTimer()
+                        }
+                    }
+                    
+                    // 处理左方向键
+                    if dpad.left.isPressed {
+                        self.lastButtonPressed = "D-Pad Left"
+                        self.startTrackingButtonPress("D-Pad Left")
+                        self.startTimer(for: "D-Pad Left")
+                        self.dpadState = "dpad.left.filled"
+                        self.currentPressedButtons.insert("D-Pad Left")
+                    } else if dpad.left.value == 0 && currentPressedButtons.contains("D-Pad Left") {
+                        self.stopTrackingButtonPress("D-Pad Left")
+                        self.currentPressedButtons.remove("D-Pad Left")
+                        if self.lastButtonPressed == "D-Pad Left" {
+                            self.lastButtonPressed = "None"
+                            self.stopTimer()
+                        }
+                    }
+                    
+                    // 处理右方向键
+                    if dpad.right.isPressed {
+                        self.lastButtonPressed = "D-Pad Right"
+                        self.startTrackingButtonPress("D-Pad Right")
+                        self.startTimer(for: "D-Pad Right")
+                        self.dpadState = "dpad.right.filled"
+                        self.currentPressedButtons.insert("D-Pad Right")
+                    } else if dpad.right.value == 0 && currentPressedButtons.contains("D-Pad Right") {
+                        self.stopTrackingButtonPress("D-Pad Right")
+                        self.currentPressedButtons.remove("D-Pad Right")
+                        if self.lastButtonPressed == "D-Pad Right" {
+                            self.lastButtonPressed = "None"
+                            self.stopTimer()
+                        }
+                    }
+                    
+                    // 更新D-Pad图标状态
+                    if !dpad.up.isPressed && !dpad.down.isPressed && !dpad.left.isPressed && !dpad.right.isPressed {
+                        self.dpadState = "dpad" // 恢复D-Pad初始状态
+                    }
+                }
+                
+                // 处理摇杆按下事件（许多控制器支持按下摇杆）
+                if dpad == gamepad.leftThumbstick && gamepad.leftThumbstickButton?.isPressed == true {
+                    self.lastButtonPressed = "Left Thumbstick Button"
+                    self.startTrackingButtonPress("Left Thumbstick Button")
+                    self.startTimer(for: "Left Thumbstick Button")
+                    self.currentPressedButtons.insert("Left Thumbstick Button")
+                } else if dpad == gamepad.leftThumbstick && gamepad.leftThumbstickButton?.isPressed == false && 
+                          currentPressedButtons.contains("Left Thumbstick Button") {
+                    self.stopTrackingButtonPress("Left Thumbstick Button")
+                    self.currentPressedButtons.remove("Left Thumbstick Button")
+                    if self.lastButtonPressed == "Left Thumbstick Button" {
                         self.lastButtonPressed = "None"
                         self.stopTimer()
                     }
                 }
                 
-                // 处理下方向键
-                if dpad.down.isPressed {
-                    self.lastButtonPressed = "D-Pad Down"
-                    self.startTrackingButtonPress("D-Pad Down")
-                    self.startTimer(for: "D-Pad Down")
-                    self.dpadState = "dpad.down.filled"
-                    self.currentPressedButtons.insert("D-Pad Down")
-                } else if dpad.down.value == 0 && currentPressedButtons.contains("D-Pad Down") {
-                    self.stopTrackingButtonPress("D-Pad Down")
-                    self.currentPressedButtons.remove("D-Pad Down")
-                    if self.lastButtonPressed == "D-Pad Down" {
+                if dpad == gamepad.rightThumbstick && gamepad.rightThumbstickButton?.isPressed == true {
+                    self.lastButtonPressed = "Right Thumbstick Button"
+                    self.startTrackingButtonPress("Right Thumbstick Button")
+                    self.startTimer(for: "Right Thumbstick Button")
+                    self.currentPressedButtons.insert("Right Thumbstick Button")
+                } else if dpad == gamepad.rightThumbstick && gamepad.rightThumbstickButton?.isPressed == false && 
+                          currentPressedButtons.contains("Right Thumbstick Button") {
+                    self.stopTrackingButtonPress("Right Thumbstick Button")
+                    self.currentPressedButtons.remove("Right Thumbstick Button")
+                    if self.lastButtonPressed == "Right Thumbstick Button" {
                         self.lastButtonPressed = "None"
                         self.stopTimer()
                     }
-                }
-                
-                // 处理左方向键
-                if dpad.left.isPressed {
-                    self.lastButtonPressed = "D-Pad Left"
-                    self.startTrackingButtonPress("D-Pad Left")
-                    self.startTimer(for: "D-Pad Left")
-                    self.dpadState = "dpad.left.filled"
-                    self.currentPressedButtons.insert("D-Pad Left")
-                } else if dpad.left.value == 0 && currentPressedButtons.contains("D-Pad Left") {
-                    self.stopTrackingButtonPress("D-Pad Left")
-                    self.currentPressedButtons.remove("D-Pad Left")
-                    if self.lastButtonPressed == "D-Pad Left" {
-                        self.lastButtonPressed = "None"
-                        self.stopTimer()
-                    }
-                }
-                
-                // 处理右方向键
-                if dpad.right.isPressed {
-                    self.lastButtonPressed = "D-Pad Right"
-                    self.startTrackingButtonPress("D-Pad Right")
-                    self.startTimer(for: "D-Pad Right")
-                    self.dpadState = "dpad.right.filled"
-                    self.currentPressedButtons.insert("D-Pad Right")
-                } else if dpad.right.value == 0 && currentPressedButtons.contains("D-Pad Right") {
-                    self.stopTrackingButtonPress("D-Pad Right")
-                    self.currentPressedButtons.remove("D-Pad Right")
-                    if self.lastButtonPressed == "D-Pad Right" {
-                        self.lastButtonPressed = "None"
-                        self.stopTimer()
-                    }
-                }
-                
-                // 更新D-Pad图标状态
-                if !dpad.up.isPressed && !dpad.down.isPressed && !dpad.left.isPressed && !dpad.right.isPressed {
-                    self.dpadState = "dpad" // 恢复D-Pad初始状态
                 }
             }
         }
