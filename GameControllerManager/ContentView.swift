@@ -15,6 +15,8 @@ struct ContentView: View {
     
     @State private var connectedController: GCController? // 当前连接的游戏手柄
     @State private var lastButtonPressed: String = "None" // 最近按下的按键名称
+    @State private var buttonHistory: [(button: String, timestamp: Date, duration: TimeInterval?)] = [] // 按键历史记录
+    @State private var buttonPressStartTimes: [String: Date] = [:] // 按键按下的开始时间
 
     // 按键名称与 SF Symbols 图标的映射
     private let buttonMappings: [String: String] = [
@@ -73,6 +75,20 @@ struct ContentView: View {
                     }
                 }
                 .padding()
+                Divider()
+                Text("Button History") // 按键历史记录标题
+                    .font(.headline)
+                List(buttonHistory, id: \.timestamp) { record in
+                    HStack {
+                        Text(record.button) // 显示按键名称
+                        Spacer()
+                        Text("\(record.timestamp, formatter: dateFormatter)") // 显示按键按下时间
+                        if let duration = record.duration {
+                            Text("(\(String(format: "%.2f", duration))s)") // 显示持续时长
+                        }
+                    }
+                }
+                .frame(maxHeight: 200) // 限制历史记录列表的高度
             }
             .onAppear(perform: setupGameController) // 设置手柄监听
         }
@@ -116,15 +132,63 @@ struct ContentView: View {
     private func setupControllerInput(_ controller: GCController) {
         controller.extendedGamepad?.valueChangedHandler = { [self] gamepad, element in
             // 检测按键输入并更新按键名称
-            if let button = element as? GCControllerButtonInput, button.isPressed {
-                self.lastButtonPressed = "Button \(button)"
+            if let button = element as? GCControllerButtonInput {
+                let buttonName = "Button \(button)"
+                if button.isPressed {
+                    self.lastButtonPressed = buttonName
+                    self.startTrackingButtonPress(buttonName) // 开始记录按键按下时间
+                } else {
+                    self.lastButtonPressed = "None"
+                    self.stopTrackingButtonPress(buttonName) // 停止记录并计算持续时长
+                }
             } else if let dpad = element as? GCControllerDirectionPad {
-                if dpad.up.isPressed { self.lastButtonPressed = "D-Pad Up" }
-                else if dpad.down.isPressed { self.lastButtonPressed = "D-Pad Down" }
-                else if dpad.left.isPressed { self.lastButtonPressed = "D-Pad Left" }
-                else if dpad.right.isPressed { self.lastButtonPressed = "D-Pad Right" }
+                if dpad.up.isPressed {
+                    self.lastButtonPressed = "D-Pad Up"
+                    self.startTrackingButtonPress("D-Pad Up")
+                } else if dpad.down.isPressed {
+                    self.lastButtonPressed = "D-Pad Down"
+                    self.startTrackingButtonPress("D-Pad Down")
+                } else if dpad.left.isPressed {
+                    self.lastButtonPressed = "D-Pad Left"
+                    self.startTrackingButtonPress("D-Pad Left")
+                } else if dpad.right.isPressed {
+                    self.lastButtonPressed = "D-Pad Right"
+                    self.startTrackingButtonPress("D-Pad Right")
+                } else {
+                    self.lastButtonPressed = "None"
+                    self.stopTrackingButtonPress("D-Pad Up")
+                    self.stopTrackingButtonPress("D-Pad Down")
+                    self.stopTrackingButtonPress("D-Pad Left")
+                    self.stopTrackingButtonPress("D-Pad Right")
+                }
             }
         }
+    }
+
+    // 开始记录按键按下时间
+    private func startTrackingButtonPress(_ button: String) {
+        if buttonPressStartTimes[button] == nil {
+            buttonPressStartTimes[button] = Date() // 记录按下时间
+        }
+    }
+
+    // 停止记录按键按下时间并计算持续时长
+    private func stopTrackingButtonPress(_ button: String) {
+        if let startTime = buttonPressStartTimes[button] {
+            let duration = Date().timeIntervalSince(startTime) // 计算持续时长
+            buttonHistory.append((button: button, timestamp: startTime, duration: duration)) // 添加到历史记录
+            if buttonHistory.count > 10 { // 限制历史记录最多保存 10 条
+                buttonHistory.removeFirst()
+            }
+            buttonPressStartTimes[button] = nil // 清除开始时间
+        }
+    }
+
+    // 日期格式化器
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        return formatter
     }
 
     // 添加新 Item 到数据模型
