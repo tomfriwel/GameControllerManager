@@ -17,6 +17,8 @@ struct ContentView: View {
     @State private var lastButtonPressed: String = "None" // 最近按下的按键名称
     @State private var buttonHistory: [(button: String, timestamp: Date, duration: TimeInterval?)] = [] // 按键历史记录
     @State private var buttonPressStartTimes: [String: Date] = [:] // 按键按下的开始时间
+    @State private var currentButtonDuration: TimeInterval? = nil // 当前按键的持续时间
+    @State private var timer: Timer? // 定时器，用于实时更新持续时间
 
     // 按键名称与 SF Symbols 图标的映射
     private let buttonMappings: [String: String] = [
@@ -72,6 +74,11 @@ struct ContentView: View {
                         Text(lastButtonPressed) // 显示按键名称
                             .font(.headline)
                             .foregroundColor(.primary)
+                        if let duration = currentButtonDuration {
+                            Text("Duration: \(String(format: "%.2f", duration))s") // 实时显示持续时间
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
                 .padding()
@@ -91,6 +98,7 @@ struct ContentView: View {
                 .frame(maxHeight: 200) // 限制历史记录列表的高度
             }
             .onAppear(perform: setupGameController) // 设置手柄监听
+            .onDisappear { stopTimer() } // 停止定时器
         }
     }
 
@@ -137,29 +145,36 @@ struct ContentView: View {
                 if button.isPressed {
                     self.lastButtonPressed = buttonName
                     self.startTrackingButtonPress(buttonName) // 开始记录按键按下时间
+                    self.startTimer(for: buttonName) // 启动定时器实时更新持续时间
                 } else {
                     self.lastButtonPressed = "None"
                     self.stopTrackingButtonPress(buttonName) // 停止记录并计算持续时长
+                    self.stopTimer() // 停止定时器
                 }
             } else if let dpad = element as? GCControllerDirectionPad {
                 if dpad.up.isPressed {
                     self.lastButtonPressed = "D-Pad Up"
                     self.startTrackingButtonPress("D-Pad Up")
+                    self.startTimer(for: "D-Pad Up")
                 } else if dpad.down.isPressed {
                     self.lastButtonPressed = "D-Pad Down"
                     self.startTrackingButtonPress("D-Pad Down")
+                    self.startTimer(for: "D-Pad Down")
                 } else if dpad.left.isPressed {
                     self.lastButtonPressed = "D-Pad Left"
                     self.startTrackingButtonPress("D-Pad Left")
+                    self.startTimer(for: "D-Pad Left")
                 } else if dpad.right.isPressed {
                     self.lastButtonPressed = "D-Pad Right"
                     self.startTrackingButtonPress("D-Pad Right")
+                    self.startTimer(for: "D-Pad Right")
                 } else {
                     self.lastButtonPressed = "None"
                     self.stopTrackingButtonPress("D-Pad Up")
                     self.stopTrackingButtonPress("D-Pad Down")
                     self.stopTrackingButtonPress("D-Pad Left")
                     self.stopTrackingButtonPress("D-Pad Right")
+                    self.stopTimer() // 停止定时器
                 }
             }
         }
@@ -204,6 +219,27 @@ struct ContentView: View {
                 buttonHistory.removeFirst()
             }
             buttonPressStartTimes[button] = nil // 清除开始时间
+        }
+    }
+
+    // 启动定时器实时更新持续时间
+    private func startTimer(for button: String) {
+        stopTimer() // 停止之前的定时器
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            self.updateCurrentButtonDuration(button)
+        }
+    }
+
+    // 停止定时器
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    // 实时更新当前按键的持续时间
+    private func updateCurrentButtonDuration(_ button: String) {
+        if let startTime = buttonPressStartTimes[button] {
+            self.currentButtonDuration = Date().timeIntervalSince(startTime) // 计算实时持续时间
         }
     }
 
