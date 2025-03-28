@@ -38,6 +38,8 @@ struct ContentView: View {
     @State private var leftThumbstickPosition: CGPoint = .zero
     @State private var rightThumbstickPosition: CGPoint = .zero
 
+    @State private var currentPressedButtons: Set<String> = [] // 使用集合存储当前所有按下的按键
+
     // 按键名称与 SF Symbols 图标的映射
     private let buttonMappings: [String: String] = [
         "D-Pad Up": "arrow.up.circle.fill",
@@ -83,6 +85,8 @@ struct ContentView: View {
                 Text("Select an item") // 提示选择一个 Item
                 Divider()
                 Text("Connected Controller: \(connectedController?.vendorName ?? "None")") // 显示连接的手柄名称
+                
+                // 最近按下的按键信息
                 HStack {
                     Text("Last Button Pressed:") // 显示最近按下的按键
                     VStack {
@@ -100,7 +104,40 @@ struct ContentView: View {
                     }
                 }
                 .padding()
+                
+                // 当前按下的所有按键
+                VStack(alignment: .leading) {
+                    Text("Currently Pressed:") // 当前按下的所有按键标题
+                        .font(.headline)
+                    
+                    if currentPressedButtons.isEmpty {
+                        Text("None")
+                            .foregroundColor(.secondary)
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(Array(currentPressedButtons).sorted(), id: \.self) { button in
+                                    HStack {
+                                        Image(systemName: buttonIcon(for: button))
+                                            .foregroundColor(.blue)
+                                        Text(button)
+                                            .padding(.trailing, 4)
+                                    }
+                                    .padding(6)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color.blue.opacity(0.1))
+                                    )
+                                }
+                            }
+                        }
+                        .frame(height: 40)
+                    }
+                }
+                .padding(.horizontal)
+                
                 Divider()
+                
                 Text("Controller Layout") // 手柄布局标题
                     .font(.headline)
                 VStack {
@@ -279,41 +316,90 @@ struct ContentView: View {
                     self.startTrackingButtonPress(buttonName) // 开始记录按键按下时间
                     self.startTimer(for: buttonName) // 启动定时器实时更新持续时间
                     self.updateButtonState(buttonName, isPressed: true) // 更新按键状态
+                    self.currentPressedButtons.insert(buttonName) // 添加到当前按下的按键集合
                 } else {
-                    self.lastButtonPressed = "None"
+                    if self.lastButtonPressed == buttonName {
+                        self.lastButtonPressed = "None"
+                    }
                     self.stopTrackingButtonPress(buttonName) // 停止记录并计算持续时长
-                    self.stopTimer() // 停止定时器
+                    if currentPressedButtons.contains(buttonName) {
+                        self.currentPressedButtons.remove(buttonName) // 从当前按下的按键集合中移除
+                    }
                     self.updateButtonState(buttonName, isPressed: false) // 恢复按键状态
+                    
+                    // 只有在释放最后按下的按键时才停止计时器
+                    if self.lastButtonPressed == "None" {
+                        self.stopTimer()
+                    }
                 }
             } else if let dpad = element as? GCControllerDirectionPad {
+                // 处理上方向键
                 if dpad.up.isPressed {
                     self.lastButtonPressed = "D-Pad Up"
                     self.startTrackingButtonPress("D-Pad Up")
                     self.startTimer(for: "D-Pad Up")
                     self.dpadState = "dpad.up.filled" // 更新 D-Pad 状态
-                } else if dpad.down.isPressed {
+                    self.currentPressedButtons.insert("D-Pad Up") // 添加到当前按下的按键集合
+                } else if dpad.up.value == 0 && currentPressedButtons.contains("D-Pad Up") {
+                    self.stopTrackingButtonPress("D-Pad Up")
+                    self.currentPressedButtons.remove("D-Pad Up")
+                    if self.lastButtonPressed == "D-Pad Up" {
+                        self.lastButtonPressed = "None"
+                        self.stopTimer()
+                    }
+                }
+                
+                // 处理下方向键
+                if dpad.down.isPressed {
                     self.lastButtonPressed = "D-Pad Down"
                     self.startTrackingButtonPress("D-Pad Down")
                     self.startTimer(for: "D-Pad Down")
                     self.dpadState = "dpad.down.filled"
-                } else if dpad.left.isPressed {
+                    self.currentPressedButtons.insert("D-Pad Down")
+                } else if dpad.down.value == 0 && currentPressedButtons.contains("D-Pad Down") {
+                    self.stopTrackingButtonPress("D-Pad Down")
+                    self.currentPressedButtons.remove("D-Pad Down")
+                    if self.lastButtonPressed == "D-Pad Down" {
+                        self.lastButtonPressed = "None"
+                        self.stopTimer()
+                    }
+                }
+                
+                // 处理左方向键
+                if dpad.left.isPressed {
                     self.lastButtonPressed = "D-Pad Left"
                     self.startTrackingButtonPress("D-Pad Left")
                     self.startTimer(for: "D-Pad Left")
                     self.dpadState = "dpad.left.filled"
-                } else if dpad.right.isPressed {
+                    self.currentPressedButtons.insert("D-Pad Left")
+                } else if dpad.left.value == 0 && currentPressedButtons.contains("D-Pad Left") {
+                    self.stopTrackingButtonPress("D-Pad Left")
+                    self.currentPressedButtons.remove("D-Pad Left")
+                    if self.lastButtonPressed == "D-Pad Left" {
+                        self.lastButtonPressed = "None"
+                        self.stopTimer()
+                    }
+                }
+                
+                // 处理右方向键
+                if dpad.right.isPressed {
                     self.lastButtonPressed = "D-Pad Right"
                     self.startTrackingButtonPress("D-Pad Right")
                     self.startTimer(for: "D-Pad Right")
                     self.dpadState = "dpad.right.filled"
-                } else {
-                    self.lastButtonPressed = "None"
-                    self.stopTrackingButtonPress("D-Pad Up")
-                    self.stopTrackingButtonPress("D-Pad Down")
-                    self.stopTrackingButtonPress("D-Pad Left")
+                    self.currentPressedButtons.insert("D-Pad Right")
+                } else if dpad.right.value == 0 && currentPressedButtons.contains("D-Pad Right") {
                     self.stopTrackingButtonPress("D-Pad Right")
-                    self.stopTimer() // 停止定时器
-                    self.dpadState = "dpad" // 恢复 D-Pad 初始状态
+                    self.currentPressedButtons.remove("D-Pad Right")
+                    if self.lastButtonPressed == "D-Pad Right" {
+                        self.lastButtonPressed = "None"
+                        self.stopTimer()
+                    }
+                }
+                
+                // 更新D-Pad图标状态
+                if !dpad.up.isPressed && !dpad.down.isPressed && !dpad.left.isPressed && !dpad.right.isPressed {
+                    self.dpadState = "dpad" // 恢复D-Pad初始状态
                 }
             }
         }
