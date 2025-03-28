@@ -102,15 +102,6 @@ struct ContentView: View {
                 VStack {
                     // 肩部按键布局
                     HStack {
-                        Image(systemName: shoulderButtonState["L1"] ?? "l1.button.roundedbottom.horizontal")
-                            .font(.system(size: 40))
-                            .foregroundColor(.purple)
-                        Spacer()
-                        Image(systemName: shoulderButtonState["R1"] ?? "r1.button.roundedbottom.horizontal")
-                            .font(.system(size: 40))
-                            .foregroundColor(.purple)
-                    }
-                    HStack {
                         Image(systemName: shoulderButtonState["L2"] ?? "l2.button.roundedtop.horizontal")
                             .font(.system(size: 40))
                             .foregroundColor(.orange)
@@ -118,6 +109,15 @@ struct ContentView: View {
                         Image(systemName: shoulderButtonState["R2"] ?? "r2.button.roundedtop.horizontal")
                             .font(.system(size: 40))
                             .foregroundColor(.orange)
+                    }
+                    HStack {
+                        Image(systemName: shoulderButtonState["L1"] ?? "l1.button.roundedbottom.horizontal")
+                            .font(.system(size: 40))
+                            .foregroundColor(.purple)
+                        Spacer()
+                        Image(systemName: shoulderButtonState["R1"] ?? "r1.button.roundedbottom.horizontal")
+                            .font(.system(size: 40))
+                            .foregroundColor(.purple)
                     }
                     Divider()
                     // D-Pad 和按键布局
