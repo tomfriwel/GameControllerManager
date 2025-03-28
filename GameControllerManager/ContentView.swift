@@ -27,6 +27,12 @@ struct ContentView: View {
         "X": "circle",
         "Y": "circle"
     ]
+    @State private var shoulderButtonState: [String: String] = [ // 肩部按键的初始状态
+        "L1": "l1.button.roundedbottom.horizontal",
+        "R1": "r1.button.roundedbottom.horizontal",
+        "L2": "l2.button.roundedtop.horizontal",
+        "R2": "r2.button.roundedtop.horizontal"
+    ]
 
     // 按键名称与 SF Symbols 图标的映射
     private let buttonMappings: [String: String] = [
@@ -93,29 +99,52 @@ struct ContentView: View {
                 Divider()
                 Text("Controller Layout") // 手柄布局标题
                     .font(.headline)
-                HStack {
-                    // D-Pad 图标
-                    Image(systemName: dpadState)
-                        .font(.system(size: 50))
-                        .foregroundColor(.blue)
-                    Spacer()
-                    // 按键布局
-                    VStack {
-                        Image(systemName: buttonState["Y"] ?? "circle")
+                VStack {
+                    // 肩部按键布局
+                    HStack {
+                        Image(systemName: shoulderButtonState["L1"] ?? "l1.button.roundedbottom.horizontal")
                             .font(.system(size: 40))
-                            .foregroundColor(.red)
-                        HStack {
-                            Image(systemName: buttonState["X"] ?? "circle")
-                                .font(.system(size: 40))
-                                .foregroundColor(.green)
-                            Spacer()
-                            Image(systemName: buttonState["B"] ?? "circle")
-                                .font(.system(size: 40))
-                                .foregroundColor(.yellow)
-                        }
-                        Image(systemName: buttonState["A"] ?? "circle")
+                            .foregroundColor(.purple)
+                        Spacer()
+                        Image(systemName: shoulderButtonState["R1"] ?? "r1.button.roundedbottom.horizontal")
                             .font(.system(size: 40))
+                            .foregroundColor(.purple)
+                    }
+                    HStack {
+                        Image(systemName: shoulderButtonState["L2"] ?? "l2.button.roundedtop.horizontal")
+                            .font(.system(size: 40))
+                            .foregroundColor(.orange)
+                        Spacer()
+                        Image(systemName: shoulderButtonState["R2"] ?? "r2.button.roundedtop.horizontal")
+                            .font(.system(size: 40))
+                            .foregroundColor(.orange)
+                    }
+                    Divider()
+                    // D-Pad 和按键布局
+                    HStack {
+                        // D-Pad 图标
+                        Image(systemName: dpadState)
+                            .font(.system(size: 50))
                             .foregroundColor(.blue)
+                        Spacer()
+                        // 按键布局
+                        VStack {
+                            Image(systemName: buttonState["Y"] ?? "circle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.red)
+                            HStack {
+                                Image(systemName: buttonState["X"] ?? "circle")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.green)
+                                Spacer()
+                                Image(systemName: buttonState["B"] ?? "circle")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.yellow)
+                            }
+                            Image(systemName: buttonState["A"] ?? "circle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.blue)
+                        }
                     }
                 }
                 .padding()
@@ -235,6 +264,14 @@ struct ContentView: View {
             buttonState["X"] = isPressed ? "circle.fill" : "circle"
         case "Button Y":
             buttonState["Y"] = isPressed ? "circle.fill" : "circle"
+        case "Left Shoulder":
+            shoulderButtonState["L1"] = isPressed ? "l1.button.roundedbottom.horizontal.fill" : "l1.button.roundedbottom.horizontal"
+        case "Right Shoulder":
+            shoulderButtonState["R1"] = isPressed ? "r1.button.roundedbottom.horizontal.fill" : "r1.button.roundedbottom.horizontal"
+        case "Left Trigger":
+            shoulderButtonState["L2"] = isPressed ? "l2.button.roundedtop.horizontal.fill" : "l2.button.roundedtop.horizontal"
+        case "Right Trigger":
+            shoulderButtonState["R2"] = isPressed ? "r2.button.roundedtop.horizontal.fill" : "r2.button.roundedtop.horizontal"
         default:
             break
         }
