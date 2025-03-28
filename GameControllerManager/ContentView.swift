@@ -133,7 +133,7 @@ struct ContentView: View {
         controller.extendedGamepad?.valueChangedHandler = { [self] gamepad, element in
             // 检测按键输入并更新按键名称
             if let button = element as? GCControllerButtonInput {
-                let buttonName = "Button \(button)"
+                let buttonName = buttonName(for: button, in: gamepad) // 获取按键名称
                 if button.isPressed {
                     self.lastButtonPressed = buttonName
                     self.startTrackingButtonPress(buttonName) // 开始记录按键按下时间
@@ -162,6 +162,29 @@ struct ContentView: View {
                     self.stopTrackingButtonPress("D-Pad Right")
                 }
             }
+        }
+    }
+
+    // 获取按键名称
+    private func buttonName(for button: GCControllerButtonInput, in gamepad: GCExtendedGamepad) -> String {
+        if button == gamepad.buttonA {
+            return "Button A"
+        } else if button == gamepad.buttonB {
+            return "Button B"
+        } else if button == gamepad.buttonX {
+            return "Button X"
+        } else if button == gamepad.buttonY {
+            return "Button Y"
+        } else if button == gamepad.leftShoulder {
+            return "Left Shoulder"
+        } else if button == gamepad.rightShoulder {
+            return "Right Shoulder"
+        } else if button == gamepad.leftTrigger {
+            return "Left Trigger"
+        } else if button == gamepad.rightTrigger {
+            return "Right Trigger"
+        } else {
+            return "Unknown Button"
         }
     }
 
