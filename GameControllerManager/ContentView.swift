@@ -20,6 +20,14 @@ struct ContentView: View {
     @State private var currentButtonDuration: TimeInterval? = nil // 当前按键的持续时间
     @State private var timer: Timer? // 定时器，用于实时更新持续时间
 
+    @State private var dpadState: String = "dpad" // D-Pad 的初始状态
+    @State private var buttonState: [String: String] = [ // 按键的初始状态
+        "A": "circle",
+        "B": "circle",
+        "X": "circle",
+        "Y": "circle"
+    ]
+
     // 按键名称与 SF Symbols 图标的映射
     private let buttonMappings: [String: String] = [
         "D-Pad Up": "arrow.up.circle.fill",
@@ -79,6 +87,35 @@ struct ContentView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
+                    }
+                }
+                .padding()
+                Divider()
+                Text("Controller Layout") // 手柄布局标题
+                    .font(.headline)
+                HStack {
+                    // D-Pad 图标
+                    Image(systemName: dpadState)
+                        .font(.system(size: 50))
+                        .foregroundColor(.blue)
+                    Spacer()
+                    // 按键布局
+                    VStack {
+                        Image(systemName: buttonState["Y"] ?? "circle")
+                            .font(.system(size: 40))
+                            .foregroundColor(.red)
+                        HStack {
+                            Image(systemName: buttonState["X"] ?? "circle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.green)
+                            Spacer()
+                            Image(systemName: buttonState["B"] ?? "circle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.yellow)
+                        }
+                        Image(systemName: buttonState["A"] ?? "circle")
+                            .font(.system(size: 40))
+                            .foregroundColor(.blue)
                     }
                 }
                 .padding()
@@ -146,28 +183,34 @@ struct ContentView: View {
                     self.lastButtonPressed = buttonName
                     self.startTrackingButtonPress(buttonName) // 开始记录按键按下时间
                     self.startTimer(for: buttonName) // 启动定时器实时更新持续时间
+                    self.updateButtonState(buttonName, isPressed: true) // 更新按键状态
                 } else {
                     self.lastButtonPressed = "None"
                     self.stopTrackingButtonPress(buttonName) // 停止记录并计算持续时长
                     self.stopTimer() // 停止定时器
+                    self.updateButtonState(buttonName, isPressed: false) // 恢复按键状态
                 }
             } else if let dpad = element as? GCControllerDirectionPad {
                 if dpad.up.isPressed {
                     self.lastButtonPressed = "D-Pad Up"
                     self.startTrackingButtonPress("D-Pad Up")
                     self.startTimer(for: "D-Pad Up")
+                    self.dpadState = "dpad.up.filled" // 更新 D-Pad 状态
                 } else if dpad.down.isPressed {
                     self.lastButtonPressed = "D-Pad Down"
                     self.startTrackingButtonPress("D-Pad Down")
                     self.startTimer(for: "D-Pad Down")
+                    self.dpadState = "dpad.down.filled"
                 } else if dpad.left.isPressed {
                     self.lastButtonPressed = "D-Pad Left"
                     self.startTrackingButtonPress("D-Pad Left")
                     self.startTimer(for: "D-Pad Left")
+                    self.dpadState = "dpad.left.filled"
                 } else if dpad.right.isPressed {
                     self.lastButtonPressed = "D-Pad Right"
                     self.startTrackingButtonPress("D-Pad Right")
                     self.startTimer(for: "D-Pad Right")
+                    self.dpadState = "dpad.right.filled"
                 } else {
                     self.lastButtonPressed = "None"
                     self.stopTrackingButtonPress("D-Pad Up")
@@ -175,8 +218,25 @@ struct ContentView: View {
                     self.stopTrackingButtonPress("D-Pad Left")
                     self.stopTrackingButtonPress("D-Pad Right")
                     self.stopTimer() // 停止定时器
+                    self.dpadState = "dpad" // 恢复 D-Pad 初始状态
                 }
             }
+        }
+    }
+
+    // 更新按键状态
+    private func updateButtonState(_ button: String, isPressed: Bool) {
+        switch button {
+        case "Button A":
+            buttonState["A"] = isPressed ? "circle.fill" : "circle"
+        case "Button B":
+            buttonState["B"] = isPressed ? "circle.fill" : "circle"
+        case "Button X":
+            buttonState["X"] = isPressed ? "circle.fill" : "circle"
+        case "Button Y":
+            buttonState["Y"] = isPressed ? "circle.fill" : "circle"
+        default:
+            break
         }
     }
 
