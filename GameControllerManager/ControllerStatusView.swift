@@ -18,6 +18,10 @@ struct ControllerStatusView: View {
                         Text("Duration: \(String(format: "%.2f", duration))s")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
+                    } else {
+                        Text("Duration: 0.00s") // Placeholder to prevent jittering
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
@@ -26,29 +30,31 @@ struct ControllerStatusView: View {
             VStack(alignment: .leading) {
                 Text("Currently Pressed:")
                     .font(.headline)
-                if controllerManager.currentPressedButtons.isEmpty {
-                    Text("None")
-                        .foregroundColor(.secondary)
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(Array(controllerManager.currentPressedButtons).sorted(), id: \.self) { button in
-                                HStack {
-                                    Image(systemName: buttonIcon(for: button))
-                                        .foregroundColor(.blue)
-                                    Text(button)
-                                        .padding(.trailing, 4)
+                ZStack {
+                    if controllerManager.currentPressedButtons.isEmpty {
+                        Text("None")
+                            .foregroundColor(.secondary)
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(Array(controllerManager.currentPressedButtons).sorted(), id: \.self) { button in
+                                    HStack {
+                                        Image(systemName: buttonIcon(for: button))
+                                            .foregroundColor(.blue)
+                                        Text(button)
+                                            .padding(.trailing, 4)
+                                    }
+                                    .padding(6)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color.blue.opacity(0.1))
+                                    )
                                 }
-                                .padding(6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.blue.opacity(0.1))
-                                )
                             }
                         }
                     }
-                    .frame(height: 40)
                 }
+                .frame(height: 40)
             }
             .padding(.horizontal)
         }
