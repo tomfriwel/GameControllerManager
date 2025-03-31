@@ -95,9 +95,9 @@ struct ContentView: View {
                 controllerManager.onTabSwitch = { direction in // 添加回调处理
                     switch direction {
                     case .left:
-                        selectedTab = max(selectedTab - 1, 0)
+                        selectedTab = (selectedTab - 1 + 4) % 4 // Wrap around to the last tab
                     case .right:
-                        selectedTab = min(selectedTab + 1, 3)
+                        selectedTab = (selectedTab + 1) % 4 // Wrap around to the first tab
                     }
                 }
             }
