@@ -38,22 +38,23 @@ struct ControllerLayoutView: View {
                     .font(.system(size: 50))
                     .foregroundColor(.blue)
                 Spacer()
-                VStack {
+                ZStack {
                     Image(systemName: controllerManager.buttonState["Y"] ?? "circle")
                         .font(.system(size: 40))
                         .foregroundColor(.red)
-                    HStack {
-                        Image(systemName: controllerManager.buttonState["X"] ?? "circle")
-                            .font(.system(size: 40))
-                            .foregroundColor(.green)
-                        Spacer()
-                        Image(systemName: controllerManager.buttonState["B"] ?? "circle")
-                            .font(.system(size: 40))
-                            .foregroundColor(.yellow)
-                    }
+                        .offset(y: -40)
+                    Image(systemName: controllerManager.buttonState["X"] ?? "circle")
+                        .font(.system(size: 40))
+                        .foregroundColor(.green)
+                        .offset(x: -35) // Adjusted offset for better alignment
+                    Image(systemName: controllerManager.buttonState["B"] ?? "circle")
+                        .font(.system(size: 40))
+                        .foregroundColor(.yellow)
+                        .offset(x: 35) // Adjusted offset to ensure visibility
                     Image(systemName: controllerManager.buttonState["A"] ?? "circle")
                         .font(.system(size: 40))
                         .foregroundColor(.blue)
+                        .offset(y: 40)
                 }
             }
         }
