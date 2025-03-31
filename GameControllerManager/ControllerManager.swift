@@ -230,13 +230,15 @@ class ControllerManager: ObservableObject {
         } else if button == gamepad.rightThumbstickButton {
             return "Right Thumbstick"
         } else if button == gamepad.buttonOptions {
-            return "Options Button"
-        } else if button == gamepad.buttonMenu {
-            return "PS Button"
-        } else if button == gamepad.buttonHome {
             return "Create Button"
+        } else if button == gamepad.buttonMenu {
+            return "Options Button"
+        } else if button == gamepad.buttonHome {
+            return "PS Button"
+        } else if let touchpad = gamepad.allButtons.first(where: { $0 == button }) {
+            return "Touchpad Button" // Handle touchpad button dynamically
         } else {
-            return "Unknown Button"
+            return "Unknown Button" // Ensure a return value for all cases
         }
     }
 
