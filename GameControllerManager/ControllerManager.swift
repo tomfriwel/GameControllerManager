@@ -27,6 +27,7 @@ class ControllerManager: ObservableObject {
         "L": false,
         "R": false
     ]
+    @Published var supportedButtons: [String] = [] // 新增属性
 
     private var timer: Timer?
 
@@ -97,6 +98,29 @@ class ControllerManager: ObservableObject {
                     self.handleDPadInput(dpad)
                 }
             }
+        }
+        fetchSupportedButtons(for: controller) // 初始化支持的按键列表
+    }
+
+    private func fetchSupportedButtons(for controller: GCController) {
+        supportedButtons.removeAll()
+        if let gamepad = controller.extendedGamepad {
+            if gamepad.buttonA != nil { supportedButtons.append("Button A") }
+            if gamepad.buttonB != nil { supportedButtons.append("Button B") }
+            if gamepad.buttonX != nil { supportedButtons.append("Button X") }
+            if gamepad.buttonY != nil { supportedButtons.append("Button Y") }
+            if gamepad.leftShoulder != nil { supportedButtons.append("Left Shoulder") }
+            if gamepad.rightShoulder != nil { supportedButtons.append("Right Shoulder") }
+            if gamepad.leftTrigger != nil { supportedButtons.append("Left Trigger") }
+            if gamepad.rightTrigger != nil { supportedButtons.append("Right Trigger") }
+            if gamepad.leftThumbstickButton != nil { supportedButtons.append("Left Thumbstick") }
+            if gamepad.rightThumbstickButton != nil { supportedButtons.append("Right Thumbstick") }
+            if gamepad.dpad != nil {
+                supportedButtons.append(contentsOf: ["D-Pad Up", "D-Pad Down", "D-Pad Left", "D-Pad Right"])
+            }
+            if gamepad.buttonOptions != nil { supportedButtons.append("Options Button") }
+            if gamepad.buttonMenu != nil { supportedButtons.append("PS Button") }
+            if gamepad.buttonHome != nil { supportedButtons.append("Create Button") }
         }
     }
 

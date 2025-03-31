@@ -38,15 +38,45 @@ struct ContentView: View {
             }
         } detail: {
             // 右侧详细视图
-            VStack {
-                Text("Select an item")
-                Divider()
-                Text("Connected Controller: \(controllerManager.connectedController?.vendorName ?? "None")")
-                ControllerStatusView(controllerManager: controllerManager) // 使用新的视图组件
-                Divider()
-                ControllerLayoutView(controllerManager: controllerManager) // 使用新的视图组件
-                Divider()
-                ButtonHistoryView(buttonHistory: controllerManager.buttonHistory) // 使用新的视图组件
+            TabView {
+                VStack {
+                    Text("Connected Controller: \(controllerManager.connectedController?.vendorName ?? "None")")
+                    ControllerStatusView(controllerManager: controllerManager)
+                }
+                .tabItem {
+                    Label("Status", systemImage: "gamecontroller")
+                }
+
+                ControllerLayoutView(controllerManager: controllerManager)
+                    .tabItem {
+                        Label("Layout", systemImage: "rectangle.3.group")
+                    }
+
+                VStack {
+                    Text("Button History")
+                        .font(.headline)
+                    ButtonHistoryView(buttonHistory: controllerManager.buttonHistory)
+                }
+                .tabItem {
+                    Label("History", systemImage: "clock")
+                }
+
+                VStack {
+                    Text("Supported Buttons")
+                        .font(.headline)
+                    ScrollView {
+                        VStack(alignment: .leading) {
+                            ForEach(controllerManager.supportedButtons, id: \.self) { button in
+                                Text(button)
+                                    .padding(.vertical, 2)
+                            }
+                        }
+                    }
+                    .padding()
+                }
+                .tabItem {
+                    Label("Buttons", systemImage: "list.bullet")
+                }
             }
             .onAppear(perform: controllerManager.setupGameController)
             .onDisappear(perform: controllerManager.stopTimer)
