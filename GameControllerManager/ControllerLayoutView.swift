@@ -25,13 +25,6 @@ struct ControllerLayoutView: View {
                     .foregroundColor(.purple)
             }
             Divider()
-            // 摇杆显示
-            HStack(spacing: 40) {
-                ThumbstickView(position: controllerManager.leftThumbstickPosition, label: "L", color: .blue)
-                ThumbstickView(position: controllerManager.rightThumbstickPosition, label: "R", color: .red)
-            }
-            .padding()
-            Divider()
             // D-Pad 和按键布局
             HStack {
                 Image(systemName: controllerManager.dpadState)
@@ -59,6 +52,13 @@ struct ControllerLayoutView: View {
                 .padding(.trailing, 40) // Increased padding to prevent clipping
                 .frame(maxWidth: .infinity, alignment: .trailing) // Align the group to the right
             }
+            Divider()
+            // 摇杆显示
+            HStack(spacing: 40) {
+                ThumbstickView(position: controllerManager.leftThumbstickPosition, label: "L", color: .blue)
+                ThumbstickView(position: controllerManager.rightThumbstickPosition, label: "R", color: .red)
+            }
+            .padding()
         }
     }
 }
