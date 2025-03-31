@@ -121,6 +121,11 @@ class ControllerManager: ObservableObject {
             if gamepad.buttonOptions != nil { supportedButtons.append("Options Button") }
             if gamepad.buttonMenu != nil { supportedButtons.append("PS Button") }
             if gamepad.buttonHome != nil { supportedButtons.append("Create Button") }
+            
+            // Dynamically detect the touchpad button
+            if gamepad.allButtons.contains(where: { $0.localizedName == "Touchpad" }) {
+                supportedButtons.append("Touchpad Button")
+            }
         }
     }
 
