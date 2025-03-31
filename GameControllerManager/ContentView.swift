@@ -14,6 +14,7 @@ struct ContentView: View {
     @Query private var items: [Item]
     
     @StateObject private var controllerManager = ControllerManager() // 使用新的控制器管理器
+    @State private var selectedTab: Int = 0 // 当前选中的 Tab 索引
 
     var body: some View {
         NavigationSplitView {
@@ -38,7 +39,7 @@ struct ContentView: View {
             }
         } detail: {
             // 右侧详细视图
-            TabView {
+            TabView(selection: $selectedTab) { // 绑定到 selectedTab
                 VStack {
                     Text("Connected Controller: \(controllerManager.connectedController?.vendorName ?? "None")")
                     ControllerStatusView(controllerManager: controllerManager)
@@ -46,11 +47,13 @@ struct ContentView: View {
                 .tabItem {
                     Label("Status", systemImage: "gamecontroller")
                 }
+                .tag(0) // 为每个 Tab 设置唯一的 tag
 
                 ControllerLayoutView(controllerManager: controllerManager)
                     .tabItem {
                         Label("Layout", systemImage: "rectangle.3.group")
                     }
+                    .tag(1)
 
                 VStack {
                     Text("Button History")
@@ -60,6 +63,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("History", systemImage: "clock")
                 }
+                .tag(2)
 
                 VStack {
                     Text("Supported Buttons")
@@ -84,8 +88,19 @@ struct ContentView: View {
                 .tabItem {
                     Label("Buttons", systemImage: "list.bullet")
                 }
+                .tag(3)
             }
-            .onAppear(perform: controllerManager.setupGameController)
+            .onAppear {
+                controllerManager.setupGameController()
+                controllerManager.onTabSwitch = { direction in // 添加回调处理
+                    switch direction {
+                    case .left:
+                        selectedTab = max(selectedTab - 1, 0)
+                    case .right:
+                        selectedTab = min(selectedTab + 1, 3)
+                    }
+                }
+            }
             .onDisappear(perform: controllerManager.stopTimer)
         }
     }

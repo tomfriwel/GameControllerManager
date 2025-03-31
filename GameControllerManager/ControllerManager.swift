@@ -29,6 +29,13 @@ class ControllerManager: ObservableObject {
     ]
     @Published var supportedButtons: [String] = [] // 新增属性
 
+    enum TabSwitchDirection {
+        case left
+        case right
+    }
+
+    var onTabSwitch: ((TabSwitchDirection) -> Void)? // 新增回调属性
+
     private var timer: Timer?
 
     func setupGameController() {
@@ -92,6 +99,11 @@ class ControllerManager: ObservableObject {
                     if self.lastButtonPressed == "None" {
                         self.stopTimer()
                     }
+                }
+                if button == gamepad.leftShoulder, button.isPressed {
+                    onTabSwitch?(.left) // 切换到左侧 Tab
+                } else if button == gamepad.rightShoulder, button.isPressed {
+                    onTabSwitch?(.right) // 切换到右侧 Tab
                 }
             } else if let dpad = element as? GCControllerDirectionPad {
                 if dpad == gamepad.dpad {
