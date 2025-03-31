@@ -67,8 +67,15 @@ struct ContentView: View {
                     ScrollView {
                         VStack(alignment: .leading) {
                             ForEach(controllerManager.supportedButtons, id: \.self) { button in
-                                Text(button)
-                                    .padding(.vertical, 2)
+                                HStack {
+                                    Text(button)
+                                    if controllerManager.currentPressedButtons.contains(button) {
+                                        Text("(Pressed)")
+                                            .font(.caption)
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding(.vertical, 2)
                             }
                         }
                     }
