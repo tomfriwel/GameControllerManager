@@ -23,6 +23,10 @@ class ControllerManager: ObservableObject {
     @Published var leftThumbstickPosition: CGPoint = .zero
     @Published var rightThumbstickPosition: CGPoint = .zero
     @Published var currentPressedButtons: Set<String> = []
+    @Published var thumbstickPressed: [String: Bool] = [
+        "L": false,
+        "R": false
+    ]
 
     private var timer: Timer?
 
@@ -63,6 +67,9 @@ class ControllerManager: ObservableObject {
                 x: CGFloat(gamepad.rightThumbstick.xAxis.value),
                 y: -CGFloat(gamepad.rightThumbstick.yAxis.value)
             )
+            // Handle thumbstick press
+            self.thumbstickPressed["L"] = gamepad.leftThumbstickButton?.isPressed ?? false
+            self.thumbstickPressed["R"] = gamepad.rightThumbstickButton?.isPressed ?? false
             // 按键和D-Pad处理逻辑
             if let button = element as? GCControllerButtonInput {
                 let buttonName = self.buttonName(for: button, in: gamepad)

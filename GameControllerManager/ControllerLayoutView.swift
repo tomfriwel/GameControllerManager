@@ -56,8 +56,18 @@ struct ControllerLayoutView: View {
             Divider()
             // 摇杆显示
             HStack(spacing: 40) {
-                ThumbstickView(position: controllerManager.leftThumbstickPosition, label: "L", color: .blue)
-                ThumbstickView(position: controllerManager.rightThumbstickPosition, label: "R", color: .red)
+                ThumbstickView(
+                    position: controllerManager.leftThumbstickPosition,
+                    label: "L",
+                    color: .blue,
+                    isPressed: controllerManager.thumbstickPressed["L"] ?? false
+                )
+                ThumbstickView(
+                    position: controllerManager.rightThumbstickPosition,
+                    label: "R",
+                    color: .red,
+                    isPressed: controllerManager.thumbstickPressed["R"] ?? false
+                )
             }
             .padding()
         }
@@ -68,6 +78,7 @@ struct ThumbstickView: View {
     let position: CGPoint
     let label: String
     let color: Color
+    let isPressed: Bool
 
     var body: some View {
         ZStack {
@@ -77,7 +88,7 @@ struct ThumbstickView: View {
                 .foregroundColor(.gray)
             Circle()
                 .frame(width: 30, height: 30)
-                .foregroundColor(color)
+                .foregroundColor(isPressed ? .black : color) // Change color when pressed
                 .offset(x: position.x * 25, y: position.y * 25)
             Text(label)
                 .font(.caption)
