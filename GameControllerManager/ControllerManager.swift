@@ -201,6 +201,16 @@ class ControllerManager: ObservableObject {
             return "Left Trigger"
         } else if button == gamepad.rightTrigger {
             return "Right Trigger"
+        } else if button == gamepad.leftThumbstickButton {
+            return "Left Thumbstick"
+        } else if button == gamepad.rightThumbstickButton {
+            return "Right Thumbstick"
+        } else if button == gamepad.buttonOptions {
+            return "Options Button"
+        } else if button == gamepad.buttonMenu {
+            return "PS Button"
+        } else if button == gamepad.buttonHome {
+            return "Create Button"
         } else {
             return "Unknown Button"
         }
