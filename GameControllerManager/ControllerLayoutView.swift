@@ -46,16 +46,18 @@ struct ControllerLayoutView: View {
                     Image(systemName: controllerManager.buttonState["X"] ?? "circle")
                         .font(.system(size: 40))
                         .foregroundColor(.green)
-                        .offset(x: -35) // Adjusted offset for better alignment
+                        .offset(x: -35)
                     Image(systemName: controllerManager.buttonState["B"] ?? "circle")
                         .font(.system(size: 40))
                         .foregroundColor(.yellow)
-                        .offset(x: 35) // Adjusted offset to ensure visibility
+                        .offset(x: 40) // Slightly increased offset for better visibility
                     Image(systemName: controllerManager.buttonState["A"] ?? "circle")
                         .font(.system(size: 40))
                         .foregroundColor(.blue)
                         .offset(y: 40)
                 }
+                .padding(.trailing, 40) // Increased padding to prevent clipping
+                .frame(maxWidth: .infinity, alignment: .trailing) // Align the group to the right
             }
         }
     }
