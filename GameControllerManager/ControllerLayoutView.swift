@@ -52,6 +52,7 @@ struct ControllerLayoutView: View {
                 .padding(.trailing, 40) // Increased padding to prevent clipping
                 .frame(maxWidth: .infinity, alignment: .trailing) // Align the group to the right
             }
+            .frame(height: 150) // Increased height to avoid overlap
             Divider()
             // 摇杆显示
             HStack(spacing: 40) {
